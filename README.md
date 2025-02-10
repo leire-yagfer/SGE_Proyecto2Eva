@@ -12,3 +12,5 @@ PostgreSQL se emplea como base de datos para almacenar la información, y se uti
 El proyecto también cuenta con la capacidad de modificar ciertos campos de los registros, como fechas y estados, a través de clases específicas de actualización (UpdateUsuario, UpdateProyecto, UpdateTarea), facilitando la modificación parcial de los datos sin necesidad de reescribir toda la información.
 
 El servidor Uvicorn se usa para ejecutar la aplicación de manera eficiente y permitir el recargado automático durante el desarrollo. En resumen, el proyecto implementa una API robusta y flexible para la gestión de proyectos, tareas y usuarios, con validación de datos, manejo de relaciones entre entidades y persistencia de datos en una base de datos PostgreSQL.
+
+Enlace a la memoria: 
