@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends
-
-from app import schemas
 from app.db import models
 from app.db.database import get_db
 from app.schemas import Tarea, UpdateTarea
