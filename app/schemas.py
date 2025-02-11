@@ -4,26 +4,10 @@ from pydantic import BaseModel, EmailStr
 
 #CLASE USUARIO
 class Usuario(BaseModel):
-    """
-    Definir el modelo de datos para la entidad Usuario.
-
-    Atributos:
-        id (int): Identificador único del usuario.
-        nombre (str): Nombre del usuario.
-        correo (EmailStr): Correo electrónico del usuario (debe ser único).
-        fecha_registro (datetime): Fecha y hora en que el usuario se registró.
-    """
     nombre: str
     correo: EmailStr #propio de Pydantic para validar que sea un correo válido
     fecha_registro: datetime = datetime.now() #fecha actual por defecto
     id_proyecto: int
-
-#CLASES PARA MODIFICAR UN USUARIO-> las creo para que no sean campos requeridos, que se puedan modificar si se quiere únicamnete
-class UpdateUsuario(BaseModel):
-    nombre: str = None
-    correo: EmailStr = None
-    id_proyecto: int = None
-
 
 #CLASE PROYECTO
 class Proyecto(BaseModel):
@@ -32,8 +16,28 @@ class Proyecto(BaseModel):
     fecha_inicio: date
     fecha_fin: date
 
+#CLASE TAREA
+class Tarea(BaseModel):
+    nombre: str
+    descripcion: Optional[str]
+    estado: str
+    fecha_limite: date
+    proyecto_id: int
 
-#CLASE PARA MODIFICAR UN PROYECTO
+
+#Clases para modificar registros de la base de datos -> la creo para que no sean campos requeridos, que se puedan modificar si se quiere únicamnete
+#CLASE PARA MODIFICAR UN USUARIO 
+class UpdateUsuario(BaseModel):
+    nombre: str = None
+    correo: EmailStr = None
+    id_proyecto: int = None
+
+#CLASE PARA MODIFICAR UN PROYECTO 
 class UpdateProyecto(BaseModel):
     fecha_inicio: date = None
     fecha_fin: date = None
+
+#CLASE PARA MODIFICAR UNA TAREA
+class UpdateTarea(BaseModel):
+    estado: str = None
+    fecha_limite: date = None

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.db import models
 from app.db.database import get_db
-from app.schemas import Proyecto, UpdateProyecto, Usuario
+from app.schemas import Proyecto, UpdateProyecto
 
 from sqlalchemy.orm import Session
 
@@ -16,7 +16,7 @@ router = APIRouter(
 #OBTENER TODOS LOS PROYECTOS
 @router.get("/obtener_proyectos")
 def obtener_proyectos(db:Session=Depends(get_db)):
-    proyectos = db.query(models.Proyecto).all()
+    proyectos = db.query(models.ProyectoTable).all()
     print (proyectos)
     return listaproyectos
 
@@ -24,7 +24,7 @@ def obtener_proyectos(db:Session=Depends(get_db)):
 #OBTENER PROYECTO POR ID -> ÚTIL PARA VER LA INFO DE UN PROYECTO EN CONCRETO
 @router.post("/obtener_proyecto_por_id/{proyecto_id}")
 def obtener_proyecto_por_id(proyecto_id:int,db:Session=Depends(get_db)):
-    proyecto = db.query(models.Proyecto).filter(models.Proyecto.id == proyecto_id).first() #obtengo el proyecto cuyo id es el pasado por parámetro
+    proyecto = db.query(models.ProyectoTable).filter(models.ProyectoTable.id == proyecto_id).first() #obtengo el proyecto cuyo id es el pasado por parámetro
     if proyecto:
         print(proyecto.nombre)
         return proyecto
@@ -36,7 +36,7 @@ def obtener_proyecto_por_id(proyecto_id:int,db:Session=Depends(get_db)):
 @router.post("/crear_proyecto")
 def crear_proyecto(proyecto:Proyecto, db:Session=Depends(get_db)):
     newProject = proyecto.model_dump()
-    nuevo_proyecto = models.Proyecto(
+    nuevo_proyecto = models.ProyectoTable(
         #no añado ni el id ni la fecha de registro porque el id es autoincrementable y la fecha se obtiene de la que sea actualmente
         nombre = newProject["nombre"],
         descripcion = newProject["descripcion"],
@@ -53,7 +53,7 @@ def crear_proyecto(proyecto:Proyecto, db:Session=Depends(get_db)):
 #ELIMINAR UN PROYECTO POR SU ID
 @router.delete("/elimar_proyecto/{proyecto_id}")
 def eliminar_proyecto_por_id(proyecto_id:int, db:Session=Depends(get_db)):
-    deleteProject = db.query(models.Proyecto).filter(models.Proyecto.id == proyecto_id).first()
+    deleteProject = db.query(models.ProyectoTable).filter(models.ProyectoTable.id == proyecto_id).first()
     if not deleteProject:
         return {"Respuesta": "Proyecto no encontrado"}
     db.delete(deleteProject)
@@ -64,9 +64,10 @@ def eliminar_proyecto_por_id(proyecto_id:int, db:Session=Depends(get_db)):
 #MODIFICAR PROYECTOS -> solo fecha de inicio y fin
 @router.put("/modificar_proyecto/{proyecto_id}")
 def actualizar_proyecto_por_id(proyecto_id:int, updateProject:UpdateProyecto, db:Session=Depends(get_db)):
-    actualizarProject = db.query(models.Proyecto).filter(models.Proyecto.id == proyecto_id).first()
+    actualizarProject = db.query(models.ProyectoTable).filter(models.ProyectoTable.id == proyecto_id).first()
     if actualizarProject:
         actualizarProject.fecha_inicio = updateProject.fecha_inicio
         actualizarProject.fecha_fin = updateProject.fecha_fin
     db.commit
+    db.commit(actualizarProject)
     return { "Respuesta": "Proyecto actualizado correctamente"}

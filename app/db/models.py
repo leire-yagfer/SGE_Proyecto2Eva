@@ -5,7 +5,7 @@ from sqlalchemy.schema import ForeignKey
 from app.db.database import Base
 
 #Modelo de la tabla usuarios
-class Usuario(Base):
+class UsuarioTable(Base):
     __tablename__ = "usuarios"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -15,7 +15,7 @@ class Usuario(Base):
     id_proyecto = Column(Integer, ForeignKey("proyectos.id"), nullable=False)
 
 #Modelo de la tabla proyectos
-class Proyecto(Base):
+class ProyectoTable(Base):
     __tablename__ = "proyectos"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -29,7 +29,7 @@ class Proyecto(Base):
     tareas = relationship("Tarea", backref="tarea", cascade="delete, merge")
 
 #Modelo de la tabla tareas
-class Tarea(Base):
+class TareaTable(Base):
     __tablename__ = "tareas"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

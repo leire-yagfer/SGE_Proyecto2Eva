@@ -1,0 +1,8 @@
+1. Activar el entorno virtual:
+.\venv\Scripts\activate.ps1
+
+2. Instalar las librerías que almacena requirements.txt:
+pip install -r .\requirements.txt
+
+3.  Arrancar el servidor:
+python .\main.py
