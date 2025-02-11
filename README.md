@@ -13,4 +13,4 @@ El proyecto también cuenta con la capacidad de modificar ciertos campos de los 
 
 El servidor Uvicorn se usa para ejecutar la aplicación de manera eficiente y permitir el recargado automático durante el desarrollo. En resumen, el proyecto implementa una API robusta y flexible para la gestión de proyectos, tareas y usuarios, con validación de datos, manejo de relaciones entre entidades y persistencia de datos en una base de datos PostgreSQL.
 
-Enlace a la memoria: 
+[Enlace a la memoria](https://github.com/leire-yagfer/SGE_Proyecto2Eva/blob/main/SGE_proyecto2Eva_LeireYagueFernandez.pdf)
