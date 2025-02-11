@@ -8,7 +8,7 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
 
 
-#create_tables() -> solo llamar a este método una vez porque sino cada vez que se llame se crea de 0 la base de datos haciendo que los datos no sean persistentes
+create_tables() #solo llamar a este método una vez porque sino cada vez que se llame se crea de 0 la base de datos haciendo que los datos no sean persistentes
 
 app = FastAPI()
 

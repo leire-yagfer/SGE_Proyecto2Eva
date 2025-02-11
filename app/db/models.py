@@ -25,8 +25,8 @@ class ProyectoTable(Base):
     fecha_fin = Column(Date, nullable=True)
 
     #poner el id del proyecto en las tablas de usuario y tareas
-    usuarios = relationship("Usuario", backref="usuario") #no pongo cascade porque si elimino el proyecto no elimino usuarios
-    tareas = relationship("Tarea", backref="tarea", cascade="delete, merge")
+    usuarios = relationship("UsuarioTable", backref="usuario") #no pongo cascade porque si elimino el proyecto no elimino usuarios
+    tareas = relationship("TareaTable", backref="tarea", cascade="delete, merge")
 
 #Modelo de la tabla tareas
 class TareaTable(Base):

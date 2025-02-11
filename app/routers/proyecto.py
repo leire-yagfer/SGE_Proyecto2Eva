@@ -6,8 +6,6 @@ from app.schemas import Proyecto, UpdateProyecto
 
 from sqlalchemy.orm import Session
 
-listaproyectos = []
-
 router = APIRouter(
  prefix="/proyecto",
  tags=["Proyectos"]
@@ -18,7 +16,7 @@ router = APIRouter(
 def obtener_proyectos(db:Session=Depends(get_db)):
     proyectos = db.query(models.ProyectoTable).all()
     print (proyectos)
-    return listaproyectos
+    return proyectos
 
 
 #OBTENER PROYECTO POR ID -> ÚTIL PARA VER LA INFO DE UN PROYECTO EN CONCRETO
@@ -35,29 +33,32 @@ def obtener_proyecto_por_id(proyecto_id:int,db:Session=Depends(get_db)):
 #CREAR UN NUEVO PROYECTO
 @router.post("/crear_proyecto")
 def crear_proyecto(proyecto:Proyecto, db:Session=Depends(get_db)):
-    newProject = proyecto.model_dump()
-    nuevo_proyecto = models.ProyectoTable(
-        #no añado ni el id ni la fecha de registro porque el id es autoincrementable y la fecha se obtiene de la que sea actualmente
-        nombre = newProject["nombre"],
-        descripcion = newProject["descripcion"],
-        fecha_inicio = newProject["fecha_inicio"],
-        fecha_fin = newProject["fecha_fin"],
-    )
-    db.add(nuevo_proyecto)
-    db.commit()
-    db.refresh(nuevo_proyecto)
-    listaproyectos.append(newProject)
-    return{"Respuesta": "Proyecto creado"}
+    try:
+        newProject = proyecto.model_dump()
+        nuevo_proyecto = models.ProyectoTable(
+            #no añado ni el id ni la fecha de registro porque el id es autoincrementable y la fecha se obtiene de la que sea actualmente
+            nombre = newProject["nombre"],
+            descripcion = newProject["descripcion"],
+            fecha_inicio = newProject["fecha_inicio"],
+            fecha_fin = newProject["fecha_fin"],
+        )
+        db.add(nuevo_proyecto)
+        db.commit()
+        db.refresh(nuevo_proyecto)
+        return{"Respuesta": "Proyecto creado correctamente"}
+    except Exception as e:
+        return({"Error": e.args})
 
 
 #ELIMINAR UN PROYECTO POR SU ID
-@router.delete("/elimar_proyecto/{proyecto_id}")
+@router.delete("/eliminar_proyecto/{proyecto_id}")
 def eliminar_proyecto_por_id(proyecto_id:int, db:Session=Depends(get_db)):
     deleteProject = db.query(models.ProyectoTable).filter(models.ProyectoTable.id == proyecto_id).first()
+    print(deleteProject)
     if not deleteProject:
         return {"Respuesta": "Proyecto no encontrado"}
     db.delete(deleteProject)
-    db.commit
+    db.commit()
     return {"Respuesta": "Proyecto eliminado correctamente"}
 
 
@@ -68,6 +69,7 @@ def actualizar_proyecto_por_id(proyecto_id:int, updateProject:UpdateProyecto, db
     if actualizarProject:
         actualizarProject.fecha_inicio = updateProject.fecha_inicio
         actualizarProject.fecha_fin = updateProject.fecha_fin
-    db.commit
-    db.commit(actualizarProject)
-    return { "Respuesta": "Proyecto actualizado correctamente"}
+        db.commit()
+        return {"Respuesta": "Proyecto actualizado correctamente"}
+    else:
+        return{"Respuesta": "Proyecto no encontrado"}

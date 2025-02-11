@@ -2,85 +2,71 @@ from fastapi import APIRouter, Depends
 
 from app.db import models
 from app.db.database import get_db
-from app.schemas import UpdateTarea
+from app.schemas import UpdateUsuario, Usuario
 
 from sqlalchemy.orm import Session
 
-listatareas = []
-
 router = APIRouter(
- prefix="/tarea",
- tags=["Tareas"]
+ prefix="/usuario",
+ tags=["Usuarios"]
 )
 
-#OBTENER TODAS LAS TAREAS
-@router.get("/obtener_tareas")
-def obtener_tareas(db:Session=Depends(get_db)):
-    tareas = db.query(models.TareaTable).all()
-    print(tareas)
-    return listatareas
+#OBTENER TODOS LOS USUARIOS
+@router.get("/obtener_usuarios")
+def obtener_usuarios(db:Session=Depends(get_db)):
+    usuarios = db.query(models.UsuarioTable).all()
+    return usuarios
 
 
-#OBTENER TAREAS POR ID -> ÚTIL PARA VER LA INFO DE UNA TAREA CONCRETA
-@router.post("/obtener_tarea_por_id/{tarea_id}")
-def obtener_tarea_por_id(tarea_id:int,db:Session=Depends(get_db)):
-    tarea = db.query(models.TareaTable).filter(models.TareaTable.id == tarea_id).first() #obtengo la tarea cuyo id es el pasado por parámetro
-    if tarea:
-        print(tarea.nombre)
-        return tarea
-    return{"Respuesta": "Tarea no encontrado"}
+#OBTENER USUARIO POR ID -> ÚTIL PARA VER A QUÉ PROYECTO PERTENECE
+@router.get("/obtener_usuario_por_id/{user_id}")
+def obtener_usuario_por_id(user_id:int,db:Session=Depends(get_db)):
+    usuario = db.query(models.UsuarioTable).filter(models.UsuarioTable.id == user_id).first() #obtengo el usuario cuyo id es el pasado por parámetro
+    if not usuario:
+        return{"Respuesta": "Usuario no encontrado"}
+    return usuario
 
 
-'''
-#OBETNER TAREAS POR ID DEL PROYECTO (FK) _> ÚTIL PARA VER CUÁNTAS TAREAS HAY RELACIONADAS A UN PROYECTO Y EN QUÉ CNSISTE CADA UNA
-@router.post("/obtener_tarea_por_id_proyecto/{proyecto_id}")
-def obtener_tarea_por_id_proyecto(proyecto_id:int,db:Session=Depends(get_db)):
-    proyecto_tarea = db.query(models.TareaTable).filter(models.TareaTable.proyecto_id == proyecto_id).first() #obtengo la tarea cuyo id es el pasado por parámetro
-    if proyecto_tarea:
-        return proyecto_tarea
-    return{"Respuesta": "Tareas pertenecientes al proyecto no encontradas"}
-'''
+#CREAR UN NUEVO USUARIO
+@router.post("/crear_usuario")
+def crear_usuario(user:Usuario, db:Session=Depends(get_db)):
+    try:
+        newUser = user.model_dump()
+        nuevo_usuario = models.UsuarioTable(
+            #no añado ni el id ni la fecha de registro porque el id es autoincrementable y la fecha se obtiene de la que sea actualmente
+            nombre = newUser["nombre"],
+            correo = newUser["correo"],
+            id_proyecto = newUser["id_proyecto"]
+        )
+        db.add(nuevo_usuario)
+        db.commit()
+        db.refresh(nuevo_usuario)
+        return{"Respuesta": "Usuario creado correctamente"}
+    except Exception as e:
+        return({"Error": e.args})
+    
 
 
-#CREAR UNA NUEVA TAREA
-@router.post("/crear_tarea")
-def crear_tarea(tarea:models.TareaTable, db:Session=Depends(get_db)):
-    newTask = tarea.model_dump()
-    nueva_tarea = models.TareaTable(
-        #no añado el id porque es autoincrementable
-        nombre = newTask["nombre"],
-        descripcion = newTask["descripcion"],
-        estado = newTask["estado"],
-        fecha_limite = newTask["fecha_limite"],
-        proyecto_id = newTask["proyecto_id"],
-    )
-    db.add(nueva_tarea)
+#ELIMINAR UN USUARIO POR SU ID
+@router.delete("/eliminar_usuario/{user_id}")
+def eliminar_usuario_por_id(user_id:int, db:Session=Depends(get_db)):
+    deleteUser = db.query(models.UsuarioTable).filter(models.UsuarioTable.id == user_id).first()
+    if not deleteUser:
+        return {"Respuesta": "Usuario no encontrado"}
+    db.delete(deleteUser)
     db.commit()
-    db.refresh(nueva_tarea)
-    listatareas.append(newTask)
-    return{"Respuesta": "Tarea creada"}
+    return {"Respuesta": "Usuario eliminado correctamente"}
 
 
-#ELIMINAR UNA TAREA POR SU ID
-@router.delete("/elimar_tarea/{tarea_id}")
-def elimar_tarea(tarea_id:int, db:Session=Depends(get_db)):
-    deleteTask = db.query(models.TareaTable).filter(models.TareaTable.id == tarea_id).first()
-    if not deleteTask:
-        return {"Respuesta": "Tarea no encontrada"}
-    db.delete(deleteTask)
-    db.commit
-    return {"Respuesta": "Tarea eliminada correctamente"}
-
-
-#MODIFICAR TAREAS -> solo fecha límite y el estado
-@router.put("/modificar_tarea/{tarea_id}")
-def actualizar_tarea_por_id(tarea_id:int, updateTask:UpdateTarea, db:Session=Depends(get_db)):
-    actualizarTask = db.query(models.TareaTable).filter(models.TareaTable.id == tarea_id).first()
-    if actualizarTask:
-        actualizarTask.estado = updateTask.estado
-        actualizarTask.fecha_limite = updateTask.fecha_limite
-        db.commit
-        db.refresh(actualizarTask)
-        return { "Respuesta": "Tarea actualizada correctamente"}
+#MODIFICAR USUARIOS
+@router.patch("/modificar_usuario/{user_id}")
+def actualizar_usuario_por_id(user_id:int, updateUser:UpdateUsuario, db:Session=Depends(get_db)):
+    actualizarUser = db.query(models.UsuarioTable).filter(models.UsuarioTable.id == user_id).first()
+    if actualizarUser:
+        actualizarUser.nombre = updateUser.nombre
+        actualizarUser.correo = updateUser.correo
+        actualizarUser.id_proyecto = updateUser.id_proyecto
+        db.commit()
+        return { "Respuesta": "Usuario actualizado correctamente"}
     else:
-        return {"Respuesta": "Tarea no encontrada"}
+        return {"Respuesta": "Usuario no encontrado"}

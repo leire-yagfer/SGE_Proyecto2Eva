@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends
 
+from app import schemas
 from app.db import models
 from app.db.database import get_db
-from app.schemas import UpdateTarea
+from app.schemas import Tarea, UpdateTarea
 
 from sqlalchemy.orm import Session
-
-listatareas = []
 
 router = APIRouter(
  prefix="/tarea",
@@ -18,7 +17,7 @@ router = APIRouter(
 def obtener_tareas(db:Session=Depends(get_db)):
     tareas = db.query(models.TareaTable).all()
     print(tareas)
-    return listatareas
+    return tareas
 
 
 #OBTENER TAREAS POR ID -> ÚTIL PARA VER LA INFO DE UNA TAREA CONCRETA
@@ -31,20 +30,18 @@ def obtener_tarea_por_id(tarea_id:int,db:Session=Depends(get_db)):
     return{"Respuesta": "Tarea no encontrado"}
 
 
-'''
-#OBETNER TAREAS POR ID DEL PROYECTO (FK) _> ÚTIL PARA VER CUÁNTAS TAREAS HAY RELACIONADAS A UN PROYECTO Y EN QUÉ CNSISTE CADA UNA
+#OBETNER TAREAS POR ID DEL PROYECTO (FK) -> ÚTIL PARA VER CUÁNTAS TAREAS HAY RELACIONADAS A UN PROYECTO Y EN QUÉ CNSISTE CADA UNA
 @router.post("/obtener_tarea_por_id_proyecto/{proyecto_id}")
 def obtener_tarea_por_id_proyecto(proyecto_id:int,db:Session=Depends(get_db)):
-    proyecto_tarea = db.query(models.TareaTable).filter(models.TareaTable.proyecto_id == proyecto_id).first() #obtengo la tarea cuyo id es el pasado por parámetro
+    proyecto_tarea = db.query(models.TareaTable).filter(models.TareaTable.proyecto_id == proyecto_id).all() #obtengo todas aquellas tareas que tienen el id_proyecto igual
     if proyecto_tarea:
         return proyecto_tarea
     return{"Respuesta": "Tareas pertenecientes al proyecto no encontradas"}
-'''
 
 
 #CREAR UNA NUEVA TAREA
 @router.post("/crear_tarea")
-def crear_tarea(tarea:models.TareaTable, db:Session=Depends(get_db)):
+def crear_tarea(tarea:Tarea, db:Session=Depends(get_db)):
     newTask = tarea.model_dump()
     nueva_tarea = models.TareaTable(
         #no añado el id porque es autoincrementable
@@ -56,19 +53,17 @@ def crear_tarea(tarea:models.TareaTable, db:Session=Depends(get_db)):
     )
     db.add(nueva_tarea)
     db.commit()
-    db.refresh(nueva_tarea)
-    listatareas.append(newTask)
     return{"Respuesta": "Tarea creada"}
 
 
 #ELIMINAR UNA TAREA POR SU ID
-@router.delete("/elimar_tarea/{tarea_id}")
+@router.delete("/eliminar_tarea/{tarea_id}")
 def elimar_tarea(tarea_id:int, db:Session=Depends(get_db)):
     deleteTask = db.query(models.TareaTable).filter(models.TareaTable.id == tarea_id).first()
     if not deleteTask:
         return {"Respuesta": "Tarea no encontrada"}
     db.delete(deleteTask)
-    db.commit
+    db.commit()
     return {"Respuesta": "Tarea eliminada correctamente"}
 
 
@@ -79,8 +74,7 @@ def actualizar_tarea_por_id(tarea_id:int, updateTask:UpdateTarea, db:Session=Dep
     if actualizarTask:
         actualizarTask.estado = updateTask.estado
         actualizarTask.fecha_limite = updateTask.fecha_limite
-        db.commit
-        db.refresh(actualizarTask)
+        db.commit()
         return { "Respuesta": "Tarea actualizada correctamente"}
     else:
         return {"Respuesta": "Tarea no encontrada"}

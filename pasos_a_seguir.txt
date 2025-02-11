@@ -5,4 +5,10 @@
 pip install -r .\requirements.txt
 
 3.  Arrancar el servidor:
-python .\main.py
+Python .\main.py
+
+4. Acceso a FastAPI con Swagger:
+http://127.0.0.1:8000/docs
+
+5. Acceso a la base de datos:
+http://127.0.0.1/browser/
